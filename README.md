@@ -2,7 +2,7 @@
 A simple Chrome extension that adds a floating, clickable icon to any webpage to instantly mute and unmute the tab's audio.
 
 
-##✨ Features
+## ✨ Features
 
 - **One-Click Mute:** Instantly toggle current tab's audio. 🔊/🔇
 
@@ -14,7 +14,7 @@ A simple Chrome extension that adds a floating, clickable icon to any webpage to
 
 - **Modern Manifest V3:** Built using the latest Chrome extension standards. 🚀
 
-##🛠️Installation
+## 🛠️Installation
 
 Download: Download this repository as a ZIP file and unzip it, or clone it with `git clone`
 
