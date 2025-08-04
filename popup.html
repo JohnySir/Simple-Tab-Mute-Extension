@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mute Button Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            width: 280px;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="p-6 bg-gray-100">
+
+    <div class="space-y-6">
+        <h1 class="text-xl font-bold text-gray-800 text-center">Icon Settings</h1>
+
+        <!-- Size Control -->
+        <div>
+            <label for="size-slider" class="block text-sm font-medium text-gray-700 mb-2">Icon Size</label>
+            <div class="flex items-center space-x-3">
+                <!-- MODIFIED: Changed max value from 100 to 500 -->
+                <input id="size-slider" type="range" min="30" max="500" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                <span id="size-value" class="text-sm font-semibold text-gray-700 w-12 text-center">50px</span>
+            </div>
+        </div>
+
+        <!-- Transparency Control -->
+        <div>
+            <label for="opacity-slider" class="block text-sm font-medium text-gray-700 mb-2">Icon Transparency</label>
+             <div class="flex items-center space-x-3">
+                <input id="opacity-slider" type="range" min="0.1" max="1" step="0.05" value="0.8" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+                <span id="opacity-value" class="text-sm font-semibold text-gray-700 w-8 text-center">80%</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
