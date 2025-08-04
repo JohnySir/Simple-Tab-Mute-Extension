@@ -10,6 +10,7 @@ function createMuteIcon() {
     muteIcon = document.createElement('div');
     muteIcon.id = 'universal-mute-button-icon';
     
+    // Use an SVG for the icon to avoid dealing with image paths and web accessibility issues
     const iconSvg = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="100%" height="100%">
             <path id="unmuted-path" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
@@ -21,6 +22,8 @@ function createMuteIcon() {
     
     // --- Styling for the icon ---
     muteIcon.style.position = 'fixed';
+    muteIcon.style.bottom = '20px';
+    muteIcon.style.right = '20px';
     muteIcon.style.zIndex = '99999999';
     muteIcon.style.cursor = 'pointer';
     muteIcon.style.borderRadius = '50%';
@@ -29,34 +32,39 @@ function createMuteIcon() {
     muteIcon.style.transition = 'transform 0.2s ease-in-out, opacity 0.2s ease-in-out';
     muteIcon.style.padding = '8px';
 
-    // Apply stored styles and position
-    applyStoredSettings();
+    // Apply styles from storage
+    applyStoredStyles();
 
     document.body.appendChild(muteIcon);
     
     // --- Event Listeners ---
+
+    // Click to mute/unmute
     muteIcon.addEventListener('click', (e) => {
-        if (!isDragging) {
+        if (!isDragging) { // Prevent click event during drag
             toggleMute();
         }
     });
 
+    // Drag and Drop functionality
     muteIcon.addEventListener('mousedown', (e) => {
         isDragging = true;
         offsetX = e.clientX - muteIcon.getBoundingClientRect().left;
         offsetY = e.clientY - muteIcon.getBoundingClientRect().top;
         muteIcon.style.cursor = 'grabbing';
+        // Prevent text selection while dragging
         e.preventDefault();
     });
 
     document.addEventListener('mousemove', (e) => {
         if (isDragging) {
+            // We set position using 'right' and 'bottom' so we need to calculate from window dimensions
             const newRight = window.innerWidth - (e.clientX - offsetX + muteIcon.offsetWidth);
             const newBottom = window.innerHeight - (e.clientY - offsetY + muteIcon.offsetHeight);
 
             muteIcon.style.right = `${newRight}px`;
             muteIcon.style.bottom = `${newBottom}px`;
-            muteIcon.style.left = 'auto';
+            muteIcon.style.left = 'auto'; // unset left/top
             muteIcon.style.top = 'auto';
         }
     });
@@ -65,48 +73,32 @@ function createMuteIcon() {
         if (isDragging) {
             isDragging = false;
             muteIcon.style.cursor = 'pointer';
-            
-            // NEW: Save the final position to storage
-            const finalPosition = {
-                right: muteIcon.style.right,
-                bottom: muteIcon.style.bottom
-            };
-            chrome.storage.sync.set({ iconPosition: finalPosition });
-
+            // Use a timeout to distinguish between a click and a drag-release
             setTimeout(() => { isDragging = false; }, 0);
         }
     });
 }
 
-// MODIFIED: Renamed function and added position loading
-function applyStoredSettings() {
-    // Get all settings from storage: size, opacity, and now position
-    chrome.storage.sync.get(['iconSize', 'iconOpacity', 'iconPosition'], (result) => {
+// Function to apply styles from chrome.storage
+function applyStoredStyles() {
+    chrome.storage.sync.get(['iconSize', 'iconOpacity'], (result) => {
         if (muteIcon) {
-            // Apply size and opacity
             muteIcon.style.width = `${result.iconSize || 50}px`;
             muteIcon.style.height = `${result.iconSize || 50}px`;
             muteIcon.style.opacity = `${result.iconOpacity || 0.8}`;
-
-            // NEW: Apply stored position or use default
-            if (result.iconPosition) {
-                muteIcon.style.right = result.iconPosition.right;
-                muteIcon.style.bottom = result.iconPosition.bottom;
-            } else {
-                // Default position if none is saved
-                muteIcon.style.right = '20px';
-                muteIcon.style.bottom = '20px';
-            }
         }
     });
 }
 
+// Function to toggle the mute state
 function toggleMute() {
     isMuted = !isMuted;
     updateIconState(isMuted);
+    // Send message to background script to perform the actual mute/unmute action
     chrome.runtime.sendMessage({ type: 'TOGGLE_MUTE', payload: { muted: isMuted } });
 }
 
+// Update the visual state of the icon (muted/unmuted SVG paths)
 function updateIconState(muted) {
     if (muteIcon) {
         const unmutedPath = muteIcon.querySelector('#unmuted-path');
@@ -114,15 +106,17 @@ function updateIconState(muted) {
         if (muted) {
             unmutedPath.style.display = 'none';
             mutedPath.style.display = 'block';
-            muteIcon.style.backgroundColor = 'rgba(220, 38, 38, 0.7)';
+            muteIcon.style.backgroundColor = 'rgba(220, 38, 38, 0.7)'; // Red when muted
         } else {
             unmutedPath.style.display = 'block';
             mutedPath.style.display = 'none';
-            muteIcon.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+            muteIcon.style.backgroundColor = 'rgba(0, 0, 0, 0.6)'; // Black when unmuted
         }
     }
 }
 
+
+// Listen for messages from the popup (e.g., to update style)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === 'UPDATE_STYLE') {
         if (muteIcon) {
@@ -137,4 +131,5 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
 });
 
+// Create the icon when the script is injected
 createMuteIcon();

@@ -8,7 +8,6 @@ const opacityValue = document.getElementById('opacity-value');
 
 // Function to update the display values
 function updateDisplayValues(size, opacity) {
-    // MODIFIED: Adjusted width of the text container to fit larger numbers
     sizeValue.textContent = `${size}px`;
     opacityValue.textContent = `${Math.round(opacity * 100)}%`;
 }
